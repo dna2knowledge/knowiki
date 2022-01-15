@@ -54,7 +54,7 @@ function buildContents() {
 }
 
 Promise.all([
-   loadScript('../local/markdown-it.js')
+   loadScript('./view/js/markdown-it.min.js')
 ]).then(function () {
    buildHeader();
    buildContents();
