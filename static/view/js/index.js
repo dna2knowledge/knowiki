@@ -95,14 +95,15 @@ function onHashChange() {
       window.addEventListener('hashchange', onHashChange);
    }
    var hash = window.location.hash || '';
-   if (hash.charAt(0) !== '#') {
-      env.url = './md/index.md';
-      loadMarkdown(env.url);
-      return;
+   if (hash.charAt(0) !== '#' || hash === '#/' || hash === '#') {
+      hash = '#/index.md';
    }
    var cmd = hash.charAt(1);
    switch(cmd) {
    case '/':
+      if (hash.charAt(hash.length-1) === '/') {
+         hash += 'index.md';
+      }
       loadMarkdown('./md' + hash.substring(1).split('/../').join('/'));
       break;
    case '?':

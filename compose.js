@@ -12,6 +12,9 @@ const i_env = {
       staticDir: process.env.TINY_STATIC_DIR?i_path.resolve(process.env.TINY_STATIC_DIR):null,
       httpsCADir: process.env.TINY_HTTPS_CA_DIR?i_path.resolve(process.env.TINY_HTTPS_CA_DIR):null,
    },
+   knowiki: {
+      mdDir: i_path.resolve(process.env.KNOWIKI_MDDIR || '/tmp'),
+   }
 };
 
 const Mime = {
@@ -166,13 +169,107 @@ function createServer(router) {
    return server;
 }
 
+function readRequestBinary(req) {
+   return new Promise((r, e) => {
+      let body = [];
+      req.on('data', (chunk) => { body.push(chunk); });
+      req.on('end', () => {
+         body = Buffer.concat(body);
+         r(body);
+      });
+      req.on('error', e);
+   });
+}
+function e400(res, text) {
+   res.writeHead(400, text || 'Bad Request');
+   res.end();
+}
+function e500(res, text) {
+   res.writeHead(500, text || 'Internal Error');
+   res.end();
+}
+function mkdir_p(path) {
+   return new Promise((r, e) => {
+      const parent = i_path.dirname(path);
+      if (parent === path) return r();
+      _mkdir_parent(parent, path);
+
+      function _mkdir_parent(parent, path) {
+         i_fs.stat(parent, (err, s) => {
+            if (err) {
+               if (err.code === 'ENOENT') {
+                  return mkdir_p(parent).then(() => {
+                     _mkdir(path);
+                  }, e);
+               }
+               return e(err);
+            }
+            if (!s.isDirectory()) return e();
+            _mkdir(path);
+         });
+      }
+      function _mkdir(path) {
+         i_fs.stat(path, (err, s) => {
+            if (!err) {
+               if (s.isDirectory) return r();
+               return e();
+            }
+            if (err.code === 'ENOENT') {
+               i_fs.mkdir(path, (err) => {
+                  if (err) return e(err);
+                  r();
+               });
+               return;
+            }
+            e(err);
+         });
+      }
+   });
+}
+const api = {
+   write: async (req, res, opt) => {
+      const obj = {};
+      try {
+         Object.assign(
+            obj, JSON.parse(await readRequestBinary(req))
+         );
+      } catch(err) {
+         return e400(res);
+      }
+      if (!obj.path) return e400(res);
+      if (obj.path === '/') obj.path = '/index.md';
+      if (i_path.extname(obj.path) !== '.md') obj.path += '.md';
+      const path = i_path.resolve(i_path.join(i_env.knowiki.mdDir, obj.path));
+      if (!path.startsWith(i_env.knowiki.mdDir + '/')) {
+         return e400(res);
+      }
+      const parent = i_path.dirname(path);
+      await mkdir_p(parent);
+      if (obj.md) {
+         i_fs.writeFile(path, obj.md, (err) => {
+            if (err) return e500(res);
+            res.end('ok');
+         });
+      } else {
+         i_fs.writeFile(path, '', (err) => {
+            if (err) return e500(res);
+            i_fs.unlink(path, (err) => {
+               if (err) return e500(res);
+               res.end('ok');
+            });
+         });
+      }
+   }, // write
+};
+
 const server = createServer({
    test: (_req, res, options) => {
       res.end(JSON.stringify({
          text: 'hello world',
          path: `/${options.path.join('/')}`
       }));
-   }
+   },
+   api: api,
 });
 server.listen(i_env.server.port, i_env.server.host, () => {
    console.log(`TINY SERVER [composor] is listening at ${i_env.server.host}:${i_env.server.port}`);

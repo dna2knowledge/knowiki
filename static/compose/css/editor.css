@@ -1,0 +1,11 @@
+.editor > pre {
+   width: 100%;
+   margin: 0;
+}
+.editor > pre > textarea {
+   width: 100%;
+}
+.disabled {
+   opacity: 0.5;
+   pointer-events: none;
+}
