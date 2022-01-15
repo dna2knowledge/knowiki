@@ -5,7 +5,17 @@
 var CONST_NAME = 'Knowiki';
 var env = {};
 env.ui = {};
+env.url = './md/index.md';
 
+/* functions:
+ - loadScript(path) -> Promise
+ - text(str) -> Element::TextNode
+ - buildHeader()
+ - buildContents()
+ - ajax(url) -> Promise<text, code>
+ - loadMarkdown(path)
+ - onHashChange()
+ */
 function loadScript(path) {
    return new Promise(function (r, e) {
       function _load(evt) {
@@ -71,18 +81,45 @@ function ajax(url) {
    });
 }
 
+function loadMarkdown(path) {
+   ajax(path).then(function (text) {
+      env.ui.content.innerHTML = env.md.render(text);
+   }, function () {
+      env.ui.content.innerHTML = '[!] Cannot load markdown file';
+   });
+}
+
+function onHashChange() {
+   if (!env._registered_onHashChange) {
+      env._registered_onHashChange = true;
+      window.addEventListener('hashchange', onHashChange);
+   }
+   var hash = window.location.hash || '';
+   if (hash.charAt(0) !== '#') {
+      env.url = './md/index.md';
+      loadMarkdown(env.url);
+      return;
+   }
+   var cmd = hash.charAt(1);
+   switch(cmd) {
+   case '/':
+      loadMarkdown('./md' + hash.substring(1).split('/../').join('/'));
+      break;
+   case '?':
+      env.ui.content.innerHTML = '[!] search: not implemented yet';
+      break;
+   default:
+      env.ui.content.innerHTML = '[!] invalid URL';
+   }
+}
+
 Promise.all([
    loadScript('./js/markdown-it.min.js')
 ]).then(function () {
    buildHeader();
    buildContents();
-   env.md = new window.markdownit({ html: true,  });
-
-   ajax('./md/index.md').then(function (text) {
-      env.ui.content.innerHTML = env.md.render(text);
-   }, function () {
-      console.error('Cannot load markdown file');
-   });
+   env.md = new window.markdownit({ html: true, });
+   onHashChange();
 }, function (err) {
    console.log(err);
 });
