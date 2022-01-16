@@ -14,16 +14,45 @@ body {
    align-items: center;
    display: flex;
    height: 3.5rem;
-   justify-content: space-between;
 }
 .header > nav > a {
    text-decoration: none;
    color: white;
+}
+.header-nav {
+   align-items: stretch;
+   display: flex;
+   height: 100%;
+   margin: 0 0 0 20px;
+   padding: 0;
+   list-style: none;
+   justify-content: flex-end;
+}
+.header-nav > li {
+   align-items: stretch;
+   display: inline-flex;
+   flex: none;
+}
+.header-nav > li > a {
+   align-items: center;
+   display: inline-flex;
+   padding: 0 0.9375rem;
+   text-align: center;
+   text-decoration: none;
+   width: 100%;
+   color: #ddd;
+   border-top: 3px solid transparent;
+   border-bottom: 3px solid transparent;
+}
+.header-nav > li > a:hover {
+   color: white;
+   border-bottom: 3px solid white;
 }
 .content {
    width: 100%;
 }
 .content > div {
    margin: 0.1rem auto 1.875rem auto;
+   padding: 5px;
    max-width: 55rem;
 }

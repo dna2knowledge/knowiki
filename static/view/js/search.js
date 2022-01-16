@@ -13,7 +13,6 @@ env.url = './md/index.md';
  - buildHeader()
  - buildContents()
  - ajax(url) -> Promise<text, code>
- - loadMarkdown(path)
  - onHashChange()
  */
 function loadScript(path) {
@@ -47,7 +46,7 @@ function buildHeader() {
    var nav = document.createElement('nav');
    div.appendChild(nav);
    var elem = document.createElement('a');
-   elem.href = '#';
+   elem.href = '/';
    elem.appendChild(text(CONST_NAME));
    nav.appendChild(elem);
 
@@ -92,45 +91,18 @@ function ajax(url) {
    });
 }
 
-function loadMarkdown(path) {
-   ajax(path).then(function (text) {
-      env.ui.content.innerHTML = env.md.render(text);
-   }, function () {
-      env.ui.content.innerHTML = '[!] Cannot load markdown file';
-   });
-}
-
 function onHashChange() {
    if (!env._registered_onHashChange) {
       env._registered_onHashChange = true;
       window.addEventListener('hashchange', onHashChange);
    }
-   var hash = window.location.hash || '';
-   if (hash.charAt(0) !== '#' || hash === '#/' || hash === '#') {
-      hash = '#/index.md';
-   }
-   var cmd = hash.charAt(1);
-   switch(cmd) {
-   case '/':
-      if (hash.charAt(hash.length-1) === '/') {
-         hash += 'index.md';
-      }
-      loadMarkdown('./md' + hash.substring(1).split('/../').join('/'));
-      break;
-   case '?':
-      env.ui.content.innerHTML = '[!] search: not implemented yet';
-      break;
-   default:
-      env.ui.content.innerHTML = '[!] invalid URL';
-   }
+   env.ui.content.innerHTML = '[!] not implemented yet.';
 }
 
 Promise.all([
-   loadScript('./js/markdown-it.min.js')
 ]).then(function () {
    buildHeader();
    buildContents();
-   env.md = new window.markdownit({ html: true, });
    onHashChange();
 }, function (err) {
    console.log(err);
