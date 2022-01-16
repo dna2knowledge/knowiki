@@ -182,6 +182,7 @@ function buildMarkdownEditor() {
    code.style.height = (window.innerHeight - code.offsetTop - rem2px(2)) + 'px';
 
    var preview = document.createElement('div');
+   preview.className = 'preview';
    preview.style.display = 'none';
    ui.preview = preview;
    env.ui.content.appendChild(preview);

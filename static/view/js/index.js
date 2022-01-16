@@ -57,7 +57,7 @@ function buildHeader() {
 
 function buildContents() {
    var content = document.createElement('div');
-   content.className = 'content';
+   content.className = 'content preview';
    var div = document.createElement('div');
    content.appendChild(div);
    document.body.appendChild(content);
