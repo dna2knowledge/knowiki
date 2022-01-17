@@ -12,6 +12,9 @@ const i_env = {
       staticDir: process.env.TINY_STATIC_DIR?i_path.resolve(process.env.TINY_STATIC_DIR):null,
       httpsCADir: process.env.TINY_HTTPS_CA_DIR?i_path.resolve(process.env.TINY_HTTPS_CA_DIR):null,
    },
+   knowiki: {
+      mdDir: i_path.resolve(process.env.KNOWIKI_MDDIR || '/tmp'),
+   }
 };
 
 const Mime = {
@@ -166,13 +169,18 @@ function createServer(router) {
    return server;
 }
 
+const i_search = require('./search');
+i_search.env.grep = new i_search.Grep(i_env.knowiki.mdDir);
 const server = createServer({
    test: (_req, res, options) => {
       res.end(JSON.stringify({
          text: 'hello world',
          path: `/${options.path.join('/')}`
       }));
-   }
+   },
+   api: {
+      search: i_search.api.search,
+   }, // api
 });
 server.listen(i_env.server.port, i_env.server.host, () => {
    console.log(`TINY SERVER [viewer] is listening at ${i_env.server.host}:${i_env.server.port}`);

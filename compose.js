@@ -226,6 +226,8 @@ function mkdir_p(path) {
       }
    });
 }
+const i_search = require('./search');
+i_search.env.grep = new i_search.Grep(i_env.knowiki.mdDir);
 const api = {
    write: async (req, res, opt) => {
       const obj = {};
@@ -260,6 +262,7 @@ const api = {
          });
       }
    }, // write
+   search: i_search.api.search,
 };
 
 const server = createServer({
