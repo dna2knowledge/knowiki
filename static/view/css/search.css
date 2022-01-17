@@ -1,0 +1,7 @@
+.search-box {
+   display: flex;
+}
+.search-box > input {
+   flex: 1 0 auto;
+   padding: 5px;
+}

@@ -14,7 +14,7 @@ window._debug = env;
  - rem2px(num)
  - buildHeader()
  - buildContents()
- - ajax(url) -> Promise<text, code>
+ - ajax(url, opt) -> Promise<text, code>
  - loadMarkdown(path)
  - buildMarkdownEditor()
  - loadMarkdownEditor(relativePath)
@@ -65,6 +65,17 @@ function buildHeader() {
    elem.href = '#';
    elem.appendChild(text(CONST_NAME));
    nav.appendChild(elem);
+
+   var ul = document.createElement('ul');
+   ul.className = 'header-nav'
+   elem = document.createElement('li');
+   var a = document.createElement('a');
+   a.href = 'view/search.html';
+   a.appendChild(text('Search'));
+   elem.appendChild(a);
+   ul.appendChild(elem);
+   nav.appendChild(ul);
+
    header.appendChild(div);
    document.body.appendChild(header);
    env.ui.header = header;
