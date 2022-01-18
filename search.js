@@ -4,10 +4,29 @@ const i_path = require('path');
 const QUEUE_MAX = 10;
 const queue = [];
 
+const TEXT_TITLE = /^# (.*)$/;
 class Grep {
-   constructor(path) {
+   constructor(path, mode) {
       this.base = path;
       this.actor = 2;
+      this.mode = mode || 'exact';
+   }
+
+   score(query, text) {
+      switch(this.mode) {
+      case 'exact':
+         if (!text) return 0;
+         return text.split(query).length - 1;
+      case 'regexp':
+         const obj = {};
+         try {
+            const regexp = new RegExp(query);
+            return text.split(regexp).length - 1;
+         } catch(err) {
+            return 0;
+         }
+      }
+      return 0;
    }
 
    async act() {
@@ -39,9 +58,15 @@ class Grep {
                }
             } else {
                const text = (await _readfile(one)).toString();
-               // TODO: text.split(task.q).length -> rank
-               if (text.indexOf(task.q) >= 0) {
-                  rs.push(one.substring(this.base.length));
+               const score = this.score(task.q, text)
+               if (score > 0) {
+                  const first_line = text.split('\n')[0];
+                  const title_match = TEXT_TITLE.exec(first_line);
+                  rs.push({
+                     p: one.substring(this.base.length),
+                     t: title_match?title_match[1]:undefined,
+                     s: score,
+                  });
                   if (rs.length >= task.n) break;
                }
             }

@@ -113,8 +113,8 @@ function buildSearchResults(L) {
    L.forEach(function (item) {
       var p = document.createElement('p');
       var a = document.createElement('a');
-      a.href = '/#' + item;
-      a.appendChild(text(item));
+      a.href = '/#' + item.p;
+      a.appendChild(text((item.t || '') + (' [ ' + item.p + ' ]')));
       p.appendChild(a);
       env.ui.srdiv.appendChild(p);
    });
@@ -161,6 +161,13 @@ function doSearch() {
             env.ui.srdiv.appendChild(text('(nothing found)'));
             return;
          }
+         L = L.sort(function(a, b) {
+            if (b.s === a.s) {
+               if (b.p > a.p) return -1;
+               if (b.p < a.p) return 1;
+            }
+            return b.s - a.s;
+         });
          buildSearchResults(L);
       } catch (err) {
          env.ui.srdiv.appendChild(text('[!] error occurred.'));
